@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>L'Atelier des planches</title>
+<meta name="theme-color" content="#16161d">
+<link rel="apple-touch-icon" href="icon-192.png">
+<style>
+  :root{
+    --ink:#16161d; --paper:#e9dfc6; --paperdark:#d8cbab;
+    --red:#c8322b; --blue:#2b6e9e; --gold:#e0a32e;
+    --display:'Anton','Haettenschweiler','Impact',sans-serif;
+    --letter:'Trebuchet MS',Verdana,sans-serif;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0; background:var(--paper); color:var(--ink);
+    background-image:radial-gradient(rgba(22,22,29,.10) 1px,transparent 1px);
+    background-size:6px 6px;
+    font-family:var(--letter);
+    padding:max(18px,env(safe-area-inset-top)) 16px 70px;
+  }
+  .wrap{max-width:620px;margin:0 auto}
+
+  h1{font-family:var(--display);font-size:50px;line-height:.9;margin:0;letter-spacing:-1px;
+     text-shadow:4px 4px 0 var(--red),8px 8px 0 rgba(22,22,29,.18)}
+  .sub{font-size:14px;margin:14px 0 0;max-width:46ch}
+
+  .bloc{border:4px solid var(--ink);background:#fff;box-shadow:7px 7px 0 rgba(22,22,29,.85);
+        padding:18px;margin:26px 0}
+  textarea,input,select{width:100%;border:3px solid var(--ink);padding:11px;font-family:var(--letter);
+        font-size:15px;background:#fff;color:var(--ink)}
+  textarea{resize:vertical}
+  label{display:block;font-size:12px;margin:14px 0 5px;font-weight:700}
+
+  .row{display:flex;gap:8px;margin-top:14px}
+  .row button{flex:1}
+  .seg{font-family:var(--letter);font-weight:700;font-size:13px;padding:11px 6px;border:3px solid var(--ink);
+       background:#fff;color:var(--ink);cursor:pointer}
+  .seg.on{background:var(--red);color:#fff}
+  .tags{display:flex;flex-wrap:wrap;gap:7px;margin-top:12px}
+  .tag{font-size:12px;padding:7px 11px;border:2px solid var(--ink);background:transparent;cursor:pointer}
+  .tag.on{background:var(--blue);color:#fff}
+
+  .cta{font-family:var(--display);font-size:16px;letter-spacing:1px;padding:13px 20px;width:100%;
+       color:var(--paper);background:var(--ink);border:3px solid var(--ink);cursor:pointer;
+       box-shadow:4px 4px 0 var(--red);margin-top:16px}
+  .cta.creux{background:transparent;color:var(--ink);box-shadow:none}
+  .cta:disabled{opacity:.4;cursor:not-allowed}
+
+  .etat{font-size:13px;margin:12px 0 0}
+  .err{color:var(--red);font-weight:700}
+
+  .slider{display:flex;align-items:center;gap:12px;margin-top:16px;font-size:13px}
+  .slider input{flex:1;accent-color:var(--red);border:none;padding:0}
+  .slider b{font-family:var(--display);font-size:20px}
+
+  h2{font-family:var(--display);font-size:32px;line-height:1;margin:0;text-shadow:3px 3px 0 var(--gold)}
+  .meta{font-size:12px;margin-top:6px}
+
+  .case{margin-bottom:26px}
+  .case:nth-child(odd){transform:rotate(-.6deg)}
+  .case:nth-child(even){transform:rotate(.5deg)}
+  .cadre{border:5px solid var(--ink);background:#fff;box-shadow:7px 7px 0 rgba(22,22,29,.85);overflow:hidden}
+  .vue{position:relative;aspect-ratio:4/3;background:var(--paperdark);display:flex;align-items:center;justify-content:center}
+  .vue svg{width:100%;height:100%;display:block}
+  .num{position:absolute;top:0;left:0;background:var(--ink);color:var(--paper);font-family:var(--display);
+       font-size:15px;padding:3px 11px;letter-spacing:1px}
+  .cartouche{position:absolute;left:10px;right:10px;bottom:10px;background:var(--gold);border:3px solid var(--ink);
+       padding:7px 10px;font-size:12px;line-height:1.3}
+  .bulle{background:#fff;border:3px solid var(--ink);border-radius:22px;padding:10px 14px;font-size:13px;
+       line-height:1.35;text-transform:uppercase;letter-spacing:.3px;box-shadow:3px 3px 0 var(--ink);margin-top:10px}
+  .bulle b{color:var(--red)}
+  .bulle:nth-of-type(even) b{color:var(--blue)}
+
+  .spin{width:30px;height:30px;border:4px solid var(--ink);border-top-color:transparent;border-radius:50%;
+       animation:sp .9s linear infinite;margin:0 auto 10px}
+  @keyframes sp{to{transform:rotate(360deg)}}
+  .attente{text-align:center;font-size:12px;color:#6b6355}
+
+  .biblio button{display:block;width:100%;text-align:left;font-family:var(--letter);font-size:14px;
+       padding:11px 13px;border:3px solid var(--ink);background:#fff;cursor:pointer;margin-bottom:8px}
+  .biblio small{opacity:.6}
+  h3{font-family:var(--display);font-size:22px;margin:44px 0 12px}
+  .lien{background:none;border:none;text-decoration:underline;font-family:var(--letter);font-size:13px;
+       cursor:pointer;padding:0;color:var(--ink)}
+  .cache{display:none}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <h1>L'ATELIER<br>DES PLANCHES</h1>
+  <p class="sub">Donne un univers, une série, un film. L'atelier écrit l'épisode et l'encre case par case.</p>
+
+  <!-- Réglages -->
+  <section class="bloc" id="reglages">
+    <label for="cle">Clé API Anthropic</label>
+    <input id="cle" type="password" placeholder="sk-ant-...">
+    <label for="modele">Modèle</label>
+    <input id="modele" value="claude-sonnet-5">
+    <p class="etat">Ta clé reste sur ton téléphone, elle n'est envoyée qu'à Anthropic.</p>
+    <button class="cta" id="garderCle">Enregistrer la clé</button>
+  </section>
+
+  <p><button class="lien" id="basculeReglages">Modifier ma clé API</button></p>
+
+  <!-- Pupitre -->
+  <section class="bloc">
+    <textarea id="theme" rows="2" placeholder="Ex. : Blake et Mortimer, un royaume sous-marin, mon chat détective privé…"></textarea>
+
+    <div class="row">
+      <button class="seg on" data-mode="suite">Écrire la suite</button>
+      <button class="seg" data-mode="original">Histoire perso</button>
+    </div>
+
+    <div class="tags" id="tons"></div>
+
+    <div class="slider">
+      <span>Cases</span>
+      <input type="range" id="nb" min="3" max="6" value="5">
+      <b id="nbVal">5</b>
+    </div>
+
+    <button class="cta" id="lancer">Dessiner la planche</button>
+    <p class="etat" id="etat"></p>
+  </section>
+
+  <!-- Planche -->
+  <section id="planche" class="cache">
+    <h2 id="titre"></h2>
+    <p class="meta" id="meta"></p>
+    <div id="cases"></div>
+    <button class="cta" id="suivant">Écrire le chapitre suivant</button>
+    <button class="cta creux" id="garder">Garder cette planche</button>
+  </section>
+
+  <!-- Bibliothèque -->
+  <section class="biblio" id="biblio"></section>
+</div>
+
+<script>
+/* ---------- état ---------- */
+const S = { mode:"suite", ton:"Aventure", histoire:null, cases:[], chapitre:1, occupe:false };
+const TONS = ["Aventure","Sombre","Humour","Épique","Enquête","Horreur"];
+const $ = s => document.querySelector(s);
+
+/* ---------- stockage ---------- */
+const lire  = (k,d) => { try { return JSON.parse(localStorage.getItem(k)) ?? d } catch { return d } };
+const ecrire = (k,v) => localStorage.setItem(k, JSON.stringify(v));
+
+/* ---------- API ---------- */
+async function demander(prompt, system, maxTokens){
+  const cle = lire("bd-cle","");
+  if(!cle) throw new Error("Ajoute ta clé API dans les réglages avant de lancer une planche.");
+  const r = await fetch("https://api.anthropic.com/v1/messages",{
+    method:"POST",
+    headers:{
+      "x-api-key":cle,
+      "anthropic-version":"2023-06-01",
+      "content-type":"application/json",
+      "anthropic-dangerous-direct-browser-access":"true"
+    },
+    body:JSON.stringify({
+      model: lire("bd-modele","claude-sonnet-5"),
+      max_tokens: maxTokens || 2000,
+      system,
+      messages:[{role:"user",content:prompt}]
+    })
+  });
+  const d = await r.json();
+  if(d.error) throw new Error(d.error.message || "Le modèle n'a pas répondu.");
+  return (d.content||[]).map(b=>b.type==="text"?b.text:"").filter(Boolean).join("\n");
+}
+
+const SYS_SCENARIO = `Tu es scénariste de bande dessinée. Tu réponds UNIQUEMENT par un objet JSON valide, sans markdown, sans commentaire.
+Format exact :
+{"titre":"...","palette":["#hex","#hex","#hex","#hex"],"cases":[{"scene":"...","narration":"...","dialogues":[{"perso":"NOM","texte":"..."}]}]}
+Règles : "scene" décrit l'image en moins de 25 mots (décor, personnages, cadrage, lumière), sans texte à écrire. "narration" fait moins de 20 mots, peut être vide "". Maximum 2 dialogues par case, moins de 14 mots chacun. Tout en français.`;
+
+const SYS_DESSIN = `Tu es illustrateur de bande dessinée franco-belge. Tu réponds UNIQUEMENT par du code SVG brut, rien d'autre.
+Contraintes : <svg viewBox="0 0 400 300" xmlns="http://www.w3.org/2000/svg">, ligne claire, aplats de couleur pleins, contours noirs épais (stroke-width 3 à 5), formes simples et lisibles, silhouettes marquées, cadrage cinématographique avec premier plan et arrière-plan. Aucun texte ni lettre dans l'image. L'image remplit tout le cadre.`;
+
+function versJSON(brut){
+  const c = brut.replace(/```json/g,"").replace(/```/g,"").trim();
+  const a = c.indexOf("{"), b = c.lastIndexOf("}");
+  if(a<0||b<0) throw new Error("Réponse illisible du modèle.");
+  return JSON.parse(c.slice(a,b+1));
+}
+function versSVG(brut){
+  const a = brut.indexOf("<svg"), b = brut.lastIndexOf("</svg>");
+  return (a<0||b<0) ? null : brut.slice(a,b+6);
+}
+
+/* ---------- rendu ---------- */
+function dessinerPlanche(){
+  const box = $("#cases");
+  box.innerHTML = "";
+  S.cases.forEach((c,i)=>{
+    const el = document.createElement("div");
+    el.className = "case";
+    const contenu = c.svg ? c.svg
+      : c.erreur ? `<span class="attente">Le dessin n'est pas passé. Relance la planche.</span>`
+      : `<div class="attente"><div class="spin"></div>encrage en cours</div>`;
+    el.innerHTML = `
+      <div class="cadre">
+        <div class="vue">
+          ${contenu}
+          <div class="num">${i+1}</div>
+          ${c.narration ? `<div class="cartouche">${echap(c.narration)}</div>` : ""}
+        </div>
+      </div>
+      ${(c.dialogues||[]).map(d=>`<div class="bulle"><b>${echap(d.perso)} — </b>${echap(d.texte)}</div>`).join("")}
+    `;
+    box.appendChild(el);
+  });
+  $("#titre").textContent = S.histoire.titre;
+  $("#meta").textContent  = `Chapitre ${S.chapitre} · ${S.cases.length} cases`;
+  $("#planche").classList.remove("cache");
+}
+function echap(t){ const d=document.createElement("div"); d.textContent=t||""; return d.innerHTML; }
+function etat(msg, erreur){ const e=$("#etat"); e.textContent=msg||""; e.className="etat"+(erreur?" err":""); }
+
+/* ---------- génération ---------- */
+async function lancer(precedent){
+  const theme = $("#theme").value.trim();
+  if(!theme){ etat("Indique d'abord un univers, une série ou un thème.", true); return; }
+  S.occupe = true; $("#lancer").disabled = $("#suivant").disabled = true;
+  etat("Écriture du scénario…");
+
+  try{
+    const base = S.mode==="suite"
+      ? `Écris la suite inédite de : ${theme}. Respecte l'univers, les personnages et le ton d'origine, mais raconte un épisode nouveau.`
+      : `Invente une histoire originale dans cet univers ou sur ce thème : ${theme}.`;
+    const rappel = precedent ? `\n\nChapitre précédent (à prolonger, pas à répéter) : ${precedent}` : "";
+    const nb = $("#nb").value;
+
+    const sc = versJSON(await demander(
+      `${base}\nAmbiance : ${S.ton}.\nDécoupe en exactement ${nb} cases avec un vrai arc : accroche, montée, rebond, chute marquante.${rappel}`,
+      SYS_SCENARIO, 2000));
+
+    S.histoire = { titre: sc.titre, palette: sc.palette||[] };
+    S.cases = (sc.cases||[]).map(c=>({...c, svg:null, erreur:false}));
+    dessinerPlanche();
+    $("#planche").scrollIntoView({behavior:"smooth"});
+
+    for(let i=0;i<S.cases.length;i++){
+      etat(`Dessin de la case ${i+1} sur ${S.cases.length}…`);
+      try{
+        const svg = versSVG(await demander(
+          `Dessine cette case : ${S.cases[i].scene}\nPalette imposée : ${S.histoire.palette.join(", ")}`,
+          SYS_DESSIN, 3000));
+        S.cases[i].svg = svg; S.cases[i].erreur = !svg;
+      }catch{ S.cases[i].erreur = true; }
+      dessinerPlanche();
+    }
+    etat("");
+  }catch(e){ etat(e.message || "La génération s'est arrêtée. Réessaie.", true); }
+
+  S.occupe = false; $("#lancer").disabled = $("#suivant").disabled = false;
+}
+
+function resume(){
+  return S.cases.map(c=>`${c.narration||""} ${(c.dialogues||[]).map(d=>d.texte).join(" ")}`).join(" | ").slice(0,900);
+}
+
+/* ---------- bibliothèque ---------- */
+function afficherBiblio(){
+  const idx = lire("bd-index",[]);
+  const box = $("#biblio");
+  if(!idx.length){ box.innerHTML=""; return; }
+  box.innerHTML = `<h3>Tes planches gardées</h3>` + idx.map(b=>
+    `<button data-id="${b.id}"><strong>${echap(b.titre)}</strong> <small>· ${b.date}</small></button>`).join("");
+  box.querySelectorAll("button").forEach(b=>b.onclick=()=>ouvrir(b.dataset.id));
+}
+function garder(){
+  if(!S.histoire) return;
+  const id = "bd"+Date.now();
+  try{
+    ecrire(id, {histoire:S.histoire, cases:S.cases, theme:$("#theme").value});
+    const idx = [{id, titre:S.histoire.titre, date:new Date().toLocaleDateString("fr-FR")}, ...lire("bd-index",[])].slice(0,40);
+    ecrire("bd-index", idx);
+    afficherBiblio();
+    etat("Planche enregistrée."); setTimeout(()=>etat(""),2000);
+  }catch{ etat("Mémoire pleine : supprime d'anciennes planches.", true); }
+}
+function ouvrir(id){
+  const d = lire(id,null);
+  if(!d){ etat("Cette planche est introuvable.", true); return; }
+  S.histoire=d.histoire; S.cases=d.cases; S.chapitre=1;
+  $("#theme").value = d.theme||"";
+  dessinerPlanche();
+  $("#planche").scrollIntoView({behavior:"smooth"});
+}
+
+/* ---------- interface ---------- */
+TONS.forEach((t,i)=>{
+  const b=document.createElement("button");
+  b.className="tag"+(i===0?" on":""); b.textContent=t;
+  b.onclick=()=>{ S.ton=t; document.querySelectorAll(".tag").forEach(x=>x.classList.remove("on")); b.classList.add("on"); };
+  $("#tons").appendChild(b);
+});
+document.querySelectorAll(".seg").forEach(b=>b.onclick=()=>{
+  S.mode=b.dataset.mode;
+  document.querySelectorAll(".seg").forEach(x=>x.classList.remove("on")); b.classList.add("on");
+});
+$("#nb").oninput = e => $("#nbVal").textContent = e.target.value;
+$("#lancer").onclick = () => lancer(null);
+$("#suivant").onclick = () => { const p=resume(); S.chapitre++; lancer(p); };
+$("#garder").onclick = garder;
+$("#garderCle").onclick = () => {
+  ecrire("bd-cle", $("#cle").value.trim());
+  ecrire("bd-modele", $("#modele").value.trim() || "claude-sonnet-5");
+  $("#reglages").classList.add("cache");
+  etat("Clé enregistrée."); setTimeout(()=>etat(""),2000);
+};
+$("#basculeReglages").onclick = () => $("#reglages").classList.toggle("cache");
+
+/* ---------- démarrage ---------- */
+$("#cle").value = lire("bd-cle","");
+$("#modele").value = lire("bd-modele","claude-sonnet-5");
+if(lire("bd-cle","")) $("#reglages").classList.add("cache");
+afficherBiblio();
+</script>
+</body>
+</html>
